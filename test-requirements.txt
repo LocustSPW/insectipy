@@ -1,0 +1,5 @@
+# This file lists the requirements exclusively needed to run tests
+tox==2.9.*
+flake8==3.5.*
+pytest==3.4.*
+pytest-cov==2.5.*
