@@ -24,8 +24,10 @@ class LocustsTest(unittest.TestCase):
         '''Test that we can instantiate a Locusts class'''
         self.assertTrue(insectipy.Locusts(self.replica_set))
 
-    def test_init_replica_set_requires_a_dictionary(self):
-        '''Test that init will raise an exception if replica_set is not a
-           dictionary'''
+    def test_replia_set_matches_a_schema(self):
+        '''Test that init raises an exception if passed data does not match
+           the replica_set schema'''
         with self.assertRaises(Exception):
             insectipy.Locusts('blah')
+        with self.assertRaises(Exception):
+            insectipy.Locusts({})
