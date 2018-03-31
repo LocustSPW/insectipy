@@ -11,6 +11,16 @@ REPLICA_SET_SCHEMA = scheme.Structure({
         nonempty=True)
 })
 
+TABLENAMES = [
+    'locations',
+    'scheduled_reports',
+    'scheduled_volunteers',
+    'schedules',
+    'temp_volunteer_shifts',
+    'volunteer_assignments',
+    'volunteers'
+]
+
 
 class Locusts(object):
     """A class for interacting with the Locusts app"""
@@ -36,3 +46,8 @@ class Locusts(object):
             self.dbname = dbname
         else:
             self.dbname = self.replica_set['name']
+
+        self.db = self.mongo_client[self.dbname]
+
+        for attribute in TABLENAMES:
+            setattr(self, attribute, getattr(self.db, attribute))

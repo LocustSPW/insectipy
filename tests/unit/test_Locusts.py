@@ -1,6 +1,6 @@
 """Unit tests for the Locusts Class"""
 import unittest
-from unittest.mock import Mock
+from unittest.mock import MagicMock
 
 from pymongo import MongoClient
 
@@ -19,7 +19,8 @@ class LocustsTest(unittest.TestCase):
                 'test3:27019'
             ]
         }
-        self.mongo_client = Mock(MongoClient)
+        self.mongo_client = MagicMock(MongoClient)
+        self.mongo_client.__getitem__.side_effect = MagicMock()
         self.locusts = insectipy.Locusts(
                 self.replica_set, client=self.mongo_client)
 
@@ -40,7 +41,7 @@ class LocustsTest(unittest.TestCase):
 
     def test_mongo_client(self):
         """Test that new instances of Locusts has a mongo client"""
-        self.assertTrue(isinstance(self.locusts.mongo_client, Mock))
+        self.assertTrue(isinstance(self.locusts.mongo_client, MagicMock))
 
     def test_db_name_argument(self):
         """Test that the db name can be set by passing an argument"""
@@ -51,3 +52,15 @@ class LocustsTest(unittest.TestCase):
     def test_db_name_defaults_to_replica_set_name(self):
         """Test that dbname falls back to replica_set name"""
         self.assertEqual(self.locusts.dbname, self.replica_set['name'])
+
+    def test_properties(self):
+        """Test that other attributes used in the class are initialized"""
+        for attribute in [
+                'locations',
+                'scheduled_reports',
+                'scheduled_volunteers',
+                'schedules',
+                'temp_volunteer_shifts',
+                'volunteer_assignments',
+                'volunteers']:
+            self.assertTrue(hasattr(self.locusts, attribute))
