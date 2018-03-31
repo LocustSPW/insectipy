@@ -53,14 +53,45 @@ class LocustsTest(unittest.TestCase):
         """Test that dbname falls back to replica_set name"""
         self.assertEqual(self.locusts.dbname, self.replica_set['name'])
 
-    def test_properties(self):
-        """Test that other attributes used in the class are initialized"""
-        for attribute in [
-                'locations',
-                'scheduled_reports',
-                'scheduled_volunteers',
-                'schedules',
-                'temp_volunteer_shifts',
-                'volunteer_assignments',
-                'volunteers']:
-            self.assertTrue(hasattr(self.locusts, attribute))
+    def test_aggregate_shift_assignments(self):
+        """Test that aggregate_shift_assignments returns an object with a
+           next method"""
+        data = self.locusts.aggregate_shift_assignments()
+        next_method = getattr(data, 'next')
+        self.assertTrue(callable(next_method))
+
+    def test_aggregate_shift_assignments_data_insert(self):
+        """Test that aggregate_shift_assignments inserts data correctly"""
+        self.locusts.db.schedules.aggregate.return_value = [{
+            'volunteer_id': 1234
+        }]
+        self.locusts.db.volunteers.find_one.return_value = {
+            'first_name': 'Joe',
+            'last_name': 'Blobby',
+            'appointment': 'Guy'
+        }
+        self.locusts.aggregate_shift_assignments()
+        self.locusts.db.temp_volunteer_shifts.insert.assert_called_with(
+            {
+                'volunteer_id': 1234,
+                'full_name': 'Joe Blobby',
+                'appointment': 'Guy'
+            }
+        )
+
+    def test_aggregate_shift_assignments_when_no_volunteer_id(self):
+        """Test that aggregate_shift_assignments does not insert data if
+           no volunteer_ids have been returned from db.schedules"""
+        self.locusts.db.schedules.aggregate.return_value = [{}]
+        self.locusts.aggregate_shift_assignments()
+        self.locusts.db.temp_volunteer_shifts.insert.assert_not_called()
+
+    def test_aggregate_shift_assignments_when_no_volunteer_data(self):
+        """Test that aggregate_shift_assignments does not insert data if
+           no volunteer_data has been returned from db.volunteers"""
+        self.locusts.db.schedules.aggregate.return_value = [{
+            'volunteer_id': 1234
+        }]
+        self.locusts.db.volunteers.find_one.return_value = None
+        self.locusts.aggregate_shift_assignments()
+        self.locusts.db.temp_volunteer_shifts.insert.assert_not_called()
