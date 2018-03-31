@@ -41,3 +41,13 @@ class LocustsTest(unittest.TestCase):
     def test_mongo_client(self):
         """Test that new instances of Locusts has a mongo client"""
         self.assertTrue(isinstance(self.locusts.mongo_client, Mock))
+
+    def test_db_name_argument(self):
+        """Test that the db name can be set by passing an argument"""
+        locusts = insectipy.Locusts(
+            self.replica_set, dbname='blobby', client=self.mongo_client)
+        self.assertEqual(locusts.dbname, 'blobby')
+
+    def test_db_name_defaults_to_replica_set_name(self):
+        """Test that dbname falls back to replica_set name"""
+        self.assertEqual(self.locusts.dbname, self.replica_set['name'])
