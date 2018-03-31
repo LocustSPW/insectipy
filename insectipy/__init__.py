@@ -11,7 +11,7 @@ REPLICA_SET_SCHEMA = scheme.Structure({
         nonempty=True)
 })
 
-TABLENAMES = [
+COLLECTIONS = [
     'locations',
     'scheduled_reports',
     'scheduled_volunteers',
@@ -49,5 +49,5 @@ class Locusts(object):
 
         self.db = self.mongo_client[self.dbname]
 
-        for attribute in TABLENAMES:
+        for attribute in COLLECTIONS:
             setattr(self, attribute, getattr(self.db, attribute))
