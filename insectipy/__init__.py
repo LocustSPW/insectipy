@@ -15,14 +15,16 @@ REPLICA_SET_SCHEMA = scheme.Structure({
 class Locusts(object):
     """A class for interacting with the Locusts app"""
 
-    def __init__(self, replica_set, client=MongoClient):
+    def __init__(self, replica_set, dbname=None, client=MongoClient):
         """ Initialize the Locusts class, setting up a mongo db connection
 
-        :param replica_set: A dictionary of mongo connection data matching
-            REPLICA_SET_SCHEMA
-        :param client: A class for connecting to a mongodb service. Typically
-            the pymongo.MongoClient class. Provided as a keyword argument for
-            the sake of testing via dependency injection.
+        Args:
+            :param replica_set: A dictionary of mongo connection data matching
+                REPLICA_SET_SCHEMA
+            :param dbname: A string representing the database name
+            :param client: A class for connecting to a mongodb service
+                Typically the pymongo.MongoClient class. Provided as a keyword
+                argument for the sake of testing via dependency injection.
 
         """
         self.replica_set = REPLICA_SET_SCHEMA.serialize(replica_set)
@@ -30,3 +32,7 @@ class Locusts(object):
             self.replica_set['servers'],
             replicaSet=self.replica_set['name']
         )
+        if dbname:
+            self.dbname = dbname
+        else:
+            self.dbname = self.replica_set['name']
